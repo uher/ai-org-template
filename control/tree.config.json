@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "이 파일이 트리의 유일한 정의다. node.py에는 트리 구조가 하드코딩돼 있지 않다.",
+    "This file defines your tree. node.py hardcodes nothing about it.",
+    "",
+    "필드 설명:",
+    "  workspace_root : 아래 charter 경로들의 기준 디렉터리. 이 설정 파일 위치 기준 상대경로.",
+    "  lock_dir       : 락 파일이 쌓이는 곳(런타임 상태, gitignore 대상). 설정 파일 기준.",
+    "  inbox_dir      : 우편함 파일이 쌓이는 곳(런타임 상태, gitignore 대상). 설정 파일 기준.",
+    "  stale_hours    : 이 시간 넘게 안 풀린 락은 `list`에서 ⚠️로 표시(잊고 나간 락 의심).",
+    "  notify         : 선택. enabled=true + control/notify.conf 가 있어야 텔레그램 발송.",
+    "                   토큰은 절대 여기 넣지 않는다 — notify.conf(gitignore)에만.",
+    "  nodes          : 고정 노드. id / level / name / charter(=이 노드의 고정 상태 문서).",
+    "  auto_discover  : 디렉터리를 스캔해 자식 노드를 자동 생성. 파일 하나 = 노드 하나.",
+    "",
+    "아래 값은 '일반 소프트웨어 제품' 예시다. 자기 것으로 통째로 바꿔 써라."
+  ],
+
+  "workspace_root": "..",
+  "lock_dir": "locks",
+  "inbox_dir": "inbox",
+  "stale_hours": 6,
+
+  "notify": {
+    "enabled": false,
+    "conf": "notify.conf",
+    "prefix": "[tree]"
+  },
+
+  "nodes": [
+    {
+      "id": "L0",
+      "level": 0,
+      "name": "workspace·조율",
+      "charter": "charters/examples/L0-workspace.md"
+    },
+    {
+      "id": "L1",
+      "level": 1,
+      "name": "vision·비전",
+      "charter": "charters/examples/L1-vision.md"
+    },
+    {
+      "id": "L2",
+      "level": 2,
+      "name": "market·시장리서치",
+      "charter": "charters/examples/L2-market.md"
+    },
+    {
+      "id": "L3",
+      "level": 3,
+      "name": "product-line·제품군",
+      "charter": "charters/examples/L3-product-line.md"
+    },
+    {
+      "id": "L4",
+      "level": 4,
+      "name": "acme-app·PM",
+      "charter": "charters/examples/L4-acme-app.md"
+    }
+  ],
+
+  "auto_discover": [
+    {
+      "id_prefix": "L5.",
+      "level": 5,
+      "dir": "charters/examples/channels",
+      "glob": "*.md",
+      "exclude_suffixes": [".log.md", "-releases.md"]
+    }
+  ]
+}

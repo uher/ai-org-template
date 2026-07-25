@@ -1,0 +1,24 @@
+# notify.conf — 텔레그램 알림 자격증명 (선택 기능)
+#
+# 사용법:
+#   1) 이 파일을 control/notify.conf 로 복사한다.
+#   2) 값을 채운다.
+#   3) 권한을 좁힌다:  chmod 600 control/notify.conf
+#   4) control/tree.config.json 의 notify.enabled 를 true 로 바꾼다.
+#
+# ⚠️ notify.conf 는 .gitignore 에 들어있다. **절대 커밋하지 마라.**
+#    토큰은 tree.config.json 이나 코드에 절대 넣지 않는다 — 오직 이 파일에만.
+#    알림을 끄고 싶으면 tree.config.json 의 notify.enabled=false,
+#    또는 일시적으로 환경변수 TREE_NOTIFY=0.
+#
+# 봇 만드는 법: 텔레그램에서 @BotFather → /newbot → 토큰 발급.
+# chat_id 얻는 법: 그 봇에게 아무 메시지나 보낸 뒤
+#   curl "https://api.telegram.org/bot<토큰>/getUpdates" 의 result[].message.chat.id
+#
+# 여러 명에게 보내려면 chat_id 를 쉼표로 나열한다.
+
+bot_token=123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+chat_id=123456789
+
+# 팁: 알림 채널을 용도별로 분리하라. 트리 운영 알림(claim/handoff)이 진짜 중요한
+# 서비스 장애 알림과 같은 채팅방에 섞이면, 정작 급한 알림을 놓친다.

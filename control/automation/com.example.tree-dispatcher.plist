@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  macOS launchd 예시 (EXAMPLE — 경로를 전부 자기 것으로 바꿔야 동작한다).
+
+  설치:
+    1) <YOUR-USER> / <WORKSPACE> 를 실제 절대경로로 치환한다(launchd는 ~ 를 모른다).
+    2) cp com.example.tree-dispatcher.plist ~/Library/LaunchAgents/
+    3) chmod +x <WORKSPACE>/control/automation/backlog-dispatcher.sh   ← 사람이 직접
+    4) launchctl load ~/Library/LaunchAgents/com.example.tree-dispatcher.plist
+       (해제: launchctl unload …, 즉시 실행: launchctl start com.example.tree-dispatcher)
+
+  두 가지 트리거를 함께 건다:
+    · WatchPaths            — 우편함 디렉터리가 바뀌면 즉시 (누가 handoff를 넣자마자)
+    · StartCalendarInterval — 평일 17:00 정기 스캔 (WatchPaths가 놓쳤을 때의 안전망)
+
+  주의: WatchPaths는 디렉터리 단위 감시라 어느 노드의 우편함이 바뀌어도 발화한다.
+        디스패처 자신이 우편함을 수정하면 다시 발화할 수 있으니, 스크립트 쪽에서
+        "한 번에 하나만 처리하고 종료"를 지켜 폭주를 막는다.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.example.tree-dispatcher</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/&lt;YOUR-USER&gt;/&lt;WORKSPACE&gt;/control/automation/backlog-dispatcher.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/&lt;YOUR-USER&gt;/&lt;WORKSPACE&gt;</string>
+
+  <!-- 우편함이 바뀌면 즉시 실행 -->
+  <key>WatchPaths</key>
+  <array>
+    <string>/Users/&lt;YOUR-USER&gt;/&lt;WORKSPACE&gt;/control/inbox</string>
+  </array>
+
+  <!-- 안전망: 평일 17:00 정기 스캔 -->
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>0</integer></dict>
+  </array>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <!-- 자식 프로세스가 launchd 종료에 딸려 죽지 않게(오래 걸리는 AI 실행 대비) -->
+  <key>AbandonProcessGroup</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/&lt;YOUR-USER&gt;/&lt;WORKSPACE&gt;/control/logs/dispatcher.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/&lt;YOUR-USER&gt;/&lt;WORKSPACE&gt;/control/logs/dispatcher.err.log</string>
+</dict>
+</plist>

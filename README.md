@@ -1,0 +1,199 @@
+# ai-org-template
+
+**여러 개의 AI 세션을 하나의 워크스페이스에서 병렬로 굴리기 위한 파일 기반 협업 규약.**
+락 · 비동기 우편함 · 노드별 charter · 학습형 릴리스 노트.
+
+---
+
+## English summary
+
+### What this is
+
+A convention (plus one dependency-free Python CLI) for running **many focused AI coding
+sessions against one workspace** instead of one giant session that knows everything and
+remembers nothing.
+
+Concerns are arranged as a **tree of levels** — from "what am I doing with my life" at the
+top down to "implement this endpoint" at the bottom. **One session = one node.** A session
+never reaches across levels; it reports only to its immediate parent.
+
+### The core idea: state lives in files, not in the conversation
+
+AI sessions die. They hit context limits, get archived, or (for headless automation) are
+brand-new processes every single run. So the rule is: **anything worth keeping goes into a
+file, immediately.** Each node owns three documents:
+
+- **charter** — pinned current state (goal / open questions / decisions / next actions).
+  Rewritten in place; always current. A fresh session reads only this and is caught up.
+- **log** — append-only history. Never deleted. Explains how you got here.
+- **releases** — versioned notes framed as *learning material*: what changed, **why**,
+  what was broken before, and the reusable lesson. Not a changelog.
+
+Sessions become disposable. That is the whole point.
+
+### Mechanisms
+
+- **Per-node mutex.** Shallow (locking a parent does not lock its children, so parallel work
+  isn't preempted) with a **total lock order** by `(level, id)` — cycles can't form, so
+  deadlock is impossible. Enforced by the CLI, not by convention.
+- **Async handoffs.** Sessions can't talk to each other in real time, so one node drops work
+  into another node's file inbox. Request text is never deleted, only checkbox-flipped.
+  Requests live in the inbox; *results* live in the charter/log/releases.
+- **Adjacent-level-only communication.** No skipping levels. This keeps strategic layers from
+  drowning in day-to-day noise.
+- **The PM delegates; it does not execute.** The project-PM node judges priority and hands
+  off. If the PM starts implementing, the separation-of-concerns premise collapses.
+- **Optional:** Telegram notifications on handoff, and a headless dispatcher (launchd/cron)
+  that wakes a fresh non-interactive session to clear one queued backlog item.
+
+### Quickstart
+
+```bash
+git clone <this repo> my-workspace && cd my-workspace
+python3 control/node.py list                    # ships with a runnable example tree
+python3 control/node.py --as "me" claim L5.1 "try it"
+python3 control/node.py --as "me" handoff L4 "[report] tried it, works"
+python3 control/node.py inbox L4
+python3 control/node.py --as "me" release L5.1 "done"
+```
+
+Then edit `control/tree.config.json` to describe *your* tree. Full walkthrough in
+[`SETUP.md`](SETUP.md); the rules everyone (human and AI) must follow are in
+[`GUIDE.md`](GUIDE.md). Python 3.9+, standard library only, no install step.
+
+Docs are primarily in Korean — the CLI and file formats are language-neutral.
+
+---
+
+## 무엇을 푸는 문제인가
+
+AI 코딩 어시스턴트에게 일을 시키다 보면 세션 하나가 점점 무거워진다. 전략 얘기, 설계 얘기,
+버그 수정, 배포 얘기가 한 대화에 섞이면:
+
+- 컨텍스트가 길어져 판단이 둔해진다. 방금 정한 것도 몇 턴 뒤엔 흐릿해진다.
+- 세션이 죽거나 아카이브되면 **거기서 오간 결정이 통째로 사라진다.**
+- 여러 세션을 띄우면 이번엔 서로 같은 파일을 덮어쓰고, 무슨 결정이 어디서 났는지 모른다.
+- "지금 어느 세션을 열어서 뭘 해야 하지"를 사람이 매번 머리로 맞춰야 한다.
+
+이 템플릿은 그 넷을 각각 **관심사 분리(트리) · 파일 기반 상태 · 락 · 우편함**으로 푼다.
+
+## 핵심 아이디어 — 세션이 아니라 파일이 진실
+
+> 세션은 소모품이다. 노드는 영속적이다.
+
+새 세션이 charter 하나만 읽고 일을 이어받을 수 있으면 성공, "지난번에 얘기했잖아"가
+필요하면 실패다. 그래서 노드마다 성격이 다른 문서 3개를 둔다.
+
+| 문서 | 성격 | 규칙 |
+|---|---|---|
+| **charter** `01-backend.md` | 지금 상태 | 계속 **고쳐 쓴다.** 낡은 건 지운다. |
+| **log** `01-backend.log.md` | 흐름 | **지우지 않는다.** 한 줄씩 덧붙인다. |
+| **releases** `01-backend-releases.md` | 학습 자료 | 실질 변경만. 무엇을/왜/직전 문제/교훈. |
+
+릴리스 노트가 그냥 changelog가 아닌 게 포인트다. **"왜 바꿨나, 직전에 뭐가 문제였나"를
+같이 적는다** — 6개월 뒤 비슷한 걸 다시 만들 때 참고하고, 실패가 사라지지 않게.
+
+## 트리 — 한눈에
+
+```
+L0  workspace       트리·규칙·라우팅 자체            ← 세계관/컨트롤타워
+ └ L1  vision       무엇을 하며 살 것인가             ← 그룹(지주회사)
+    └ L2  market    시장·산업 리서치                 ← 컨설팅펌
+       └ L3  product-line   제품군·어떤 프로젝트를 띄울지  ← 회사/CEO
+          └ L4  acme-app    그 제품의 운영 + 실무 PM      ← 프로젝트 PM
+             ├ L5.1 backend      ┐
+             ├ L5.2 frontend     ├ 실행 채널 (세션 1개씩)
+             └ L5.3 data         ┘
+
+세션 1개 = 노드 1개.  컨텍스트는 위→아래로만 흐른다.
+보고·위임은 인접 레벨만 (L5 → L0 직행 없음).
+```
+
+각 노드에는 **락**(누가 지금 이걸 만지는가)과 **우편함**(누가 나에게 무슨 일을 남겼나)이
+붙는다. 락은 느슨형(부모를 잡아도 자식은 안 잠김) + 전체 순서 강제(데드락 불가능)다.
+
+```bash
+$ python3 control/node.py list
+── 트리 노드 / 락 상태 (nodes & locks) ──
+  L0      L0 workspace·조율             🟢 idle
+  L4      L4 acme-app·PM                🔒 L4·acme·PM — 릴리스 점검 (since 2026-07-25 20:31)
+    L5.1  L5 backend                    🔒 L5·acme·backend — 멱등키 미들웨어 (since 2026-07-25 19:02)
+    L5.2  L5 frontend                   🟢 idle
+```
+
+## 5분 퀵스타트 — 내 프로젝트에 붙이기
+
+```bash
+# 0) 받아서 워크스페이스 루트로 쓴다 (기존 프로젝트 옆에 두거나, 그 위에 얹는다)
+git clone <this repo> my-workspace && cd my-workspace
+
+# 1) 예시 트리로 바로 굴려본다 (설치 불필요, 표준 라이브러리만)
+python3 control/node.py list
+python3 control/node.py --as "나·테스트" claim L5.1 "감 잡기"
+python3 control/node.py --as "나·테스트" handoff L4 "[보고/L5.1] 돌려봤음. 잘 됨."
+python3 control/node.py inbox L4
+python3 control/node.py --as "나·테스트" release L5.1 "확인 완료"
+
+# 2) 내 트리로 바꾼다
+#    control/tree.config.json 의 nodes / auto_discover 를 자기 것으로 교체
+#    charters/charter-template.md 를 복사해 노드마다 charter 하나씩
+
+# 3) 새 AI 세션을 열고, control/session-prompts/open-node.md 를 첫 메시지로 붙여넣는다
+#    (<…> 부분만 자기 노드로 채워서)
+```
+
+상세 절차는 [`SETUP.md`](SETUP.md), 운영 규칙 전문은 [`GUIDE.md`](GUIDE.md).
+
+## 들어있는 것
+
+```
+README.md                     ← 지금 이 문서
+GUIDE.md                      ← 규칙 전문 (세션에 읽히는 문서)
+SETUP.md                      ← 단계별 설치·적용 가이드
+control/
+  node.py                     ← CLI: list/claim/release/handoff/inbox/inbox-done/note/log
+  tree.config.json            ← 내 트리 정의 (여기만 고치면 된다)
+  notify.conf.example         ← 텔레그램 알림 자격증명 형식 (선택)
+  session-prompts/            ← 새 세션에 붙여넣는 부팅 프롬프트 2종
+  automation/                 ← 스탠드업 · 헤드리스 디스패처 · launchd/cron 예시 (선택)
+charters/
+  charter-template.md         ← 빈 charter 스켈레톤 (한/영 병기 헤딩)
+  README.md                   ← charter vs log vs releases, 어디에 뭘 쓰나
+  examples/                   ← 바로 돌아가는 예시 트리 (가상의 SaaS "Acme App")
+```
+
+## 이게 나에게 맞나
+
+**맞는 경우**
+
+- 한 워크스페이스에서 **성격이 다른 일**(전략/설계/구현/운영)을 오래 굴린다.
+- AI 세션을 **여러 개 동시에** 쓰거나, 며칠~몇 달 단위로 되돌아온다.
+- 결정의 **이유**가 6개월 뒤에도 필요하다(같은 실수를 반복하고 싶지 않다).
+- 사람이 여럿이거나, 자동화(스케줄 실행)를 섞을 계획이 있다.
+
+**과한 경우 — 솔직히**
+
+- **주말 프로젝트 / 파일 20개짜리 저장소.** 노드 하나에 charter 하나 쓰는 것부터가
+  과잉이다. `TODO.md` 하나로 충분하다.
+- **혼자, 한 번에 하나씩만 하는 사람.** 락과 우편함은 병렬성이 있어야 값을 한다.
+  병렬로 안 굴릴 거면 트리는 그냥 폴더 이름일 뿐이다.
+- **일회성 작업.** 파일에 상태를 남기는 비용이 회수되지 않는다.
+- 이 시스템은 유지비가 든다: charter를 계속 최신으로 고쳐야 하고, 릴리스 노트를 성실히
+  써야 하고, 락을 잊지 않고 풀어야 한다. **그 습관이 안 붙으면 파일만 늘고 신뢰는 준다.**
+
+**단계적으로 도입하는 법:** 처음부터 6레벨을 만들지 마라. `L4(PM) + L5 채널 2~3개`로
+시작해서, 위 레벨은 실제로 "이 판단은 여기서 할 게 아닌데"가 반복될 때 만든다.
+
+## 알아둘 한계
+
+- **락은 협력적이다.** 파일시스템 권한으로 강제하지 않는다. 규칙을 안 지키는 세션은 못 막는다
+  — 그래서 `GUIDE.md`를 세션에 읽히는 절차가 중요하다.
+- **완전 무인 실행은 안 된다.** handoff는 사람에게 "그 세션을 열어라"를 알리는 데까지다.
+  헤드리스 디스패처를 붙여도 그건 **매번 새 세션**이라 기억이 없다 — 맥락은 전부 파일에서 온다.
+- **락 주인의 생존을 감지할 수 없다.** 락은 CLI 프로세스가 아니라 세션이 쥔다. 그래서
+  "6시간 넘게 안 풀린 락"을 시간으로만 의심 표시한다(자동 해제하지 않는다).
+- 알림은 텔레그램만 붙어 있다. 다른 채널은 `node.py`의 `_notify()` 하나만 바꾸면 된다.
+
+## 라이선스
+
+MIT — [`LICENSE`](LICENSE) 참조.

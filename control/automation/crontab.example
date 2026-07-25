@@ -1,0 +1,21 @@
+# Linux/WSL 용 예시 (macOS는 launchd plist를 쓰는 게 낫다 — WatchPaths 때문에).
+#
+# 설치: crontab -e 로 열어 아래 줄을 자기 경로로 바꿔 붙여넣는다.
+#       cron은 로그인 셸 환경을 물려받지 않는다 → PATH를 명시하고 절대경로만 쓴다.
+#
+# 주의: cron에는 launchd의 WatchPaths 같은 "파일 변화 감지"가 없다. 즉시 반응이 필요하면
+#       inotifywait(inotify-tools) 같은 걸로 별도 워처를 띄우거나, 그냥 주기 실행으로
+#       충분한지 먼저 판단하라(대개 충분하다).
+
+PATH=/usr/local/bin:/usr/bin:/bin:/home/<YOUR-USER>/.local/bin
+
+# ① 평일 08:30 — 스탠드업(어느 노드에 뭐가 밀렸는지 알림)
+30 8 * * 1-5 /usr/bin/python3 /home/<YOUR-USER>/<WORKSPACE>/control/automation/standup.py >> /home/<YOUR-USER>/<WORKSPACE>/control/logs/standup.log 2>&1
+
+# ② 평일 17:00 — 헤드리스 백로그 디스패처(선택)
+0 17 * * 1-5 /bin/bash /home/<YOUR-USER>/<WORKSPACE>/control/automation/backlog-dispatcher.sh >> /home/<YOUR-USER>/<WORKSPACE>/control/logs/dispatcher.log 2>&1
+
+# ③ (선택) 우편함 변화에 즉시 반응하고 싶다면 — systemd user service 나 아래 워처를 쓴다:
+#    while inotifywait -e create,modify /home/<YOUR-USER>/<WORKSPACE>/control/inbox; do
+#      /bin/bash /home/<YOUR-USER>/<WORKSPACE>/control/automation/backlog-dispatcher.sh
+#    done
