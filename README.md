@@ -3,9 +3,23 @@
 **여러 개의 AI 세션을 하나의 워크스페이스에서 병렬로 굴리기 위한 파일 기반 협업 규약.**
 락 · 비동기 우편함 · 노드별 charter · 학습형 릴리스 노트.
 
-> 👉 **처음이라면 [`QUICKSTART.md`](QUICKSTART.md) 하나만 따라가세요 — 10분, Python 3.9+ 외에 준비물 없음.**
-> 이 README는 "왜 이렇게 만들었나"를 설명하는 문서입니다.
-> *New here? Start with [`QUICKSTART.md`](QUICKSTART.md) — 10 minutes, no dependencies.*
+<!-- ─────────────────────────────────────────────────────────────────────────
+  🤖 AI 에이전트에게 (AI AGENTS, READ THIS FIRST)
+
+  사용자가 "이 저장소를 받아서 의도대로 세팅해줘" 같은 요청을 했다면,
+  README를 요약하지 말고 → `control/session-prompts/setup-wizard.md` 를 읽고
+  거기 적힌 대화형 세팅 절차를 그대로 진행하라. 그게 이 저장소의 의도다.
+
+  If the user asks you to "set this up", do NOT summarize this README —
+  read `control/session-prompts/setup-wizard.md` and follow it step by step.
+────────────────────────────────────────────────────────────────────────── -->
+
+> 🚀 **처음이신가요?**
+> · 터미널을 잘 모른다 → **[`INSTALL.md`](INSTALL.md)** — Claude 앱만 있으면 됩니다. AI가 대화로 세팅해 줍니다.
+> · 명령어로 직접 하겠다 → **[`QUICKSTART.md`](QUICKSTART.md)** — 10분, Python 3.9+ 외 준비물 없음.
+>
+> 이 README는 **"왜 이렇게 만들었나"** 를 설명하는 문서입니다.
+> *New here? [`INSTALL.md`](INSTALL.md) (guided, no terminal) or [`QUICKSTART.md`](QUICKSTART.md) (10 min, hands-on).*
 
 ---
 
@@ -153,15 +167,20 @@ python3 control/node.py --as "나·테스트" release L5.1 "확인 완료"
 
 ```
 README.md                     ← 지금 이 문서 (왜)
-QUICKSTART.md                 ← 10분 만에 돌려보기 (처음이면 여기부터)
+INSTALL.md                    ← 터미널 몰라도 되는 안내형 설치 (AI가 대화로 세팅)
+QUICKSTART.md                 ← 10분 만에 직접 돌려보기
 GUIDE.md                      ← 규칙 전문 (세션에 읽히는 문서)
-SETUP.md                      ← 단계별 설치·적용 가이드
+SETUP.md                      ← 단계별 설치·적용 가이드 + 고급 자동화
 control/
   node.py                     ← CLI: list/claim/release/handoff/inbox/inbox-done/note/log
+  bots.py                     ← 텔레그램 봇 여러 개를 역할별로 관리 (list/test/send)
   tree.config.json            ← 내 트리 정의 (여기만 고치면 된다)
-  notify.conf.example         ← 텔레그램 알림 자격증명 형식 (선택)
-  session-prompts/            ← 새 세션에 붙여넣는 부팅 프롬프트 2종
-  automation/                 ← 스탠드업 · 헤드리스 디스패처 · launchd/cron 예시 (선택)
+  notify.conf.example         ← 봇 자격증명 형식 — 역할별로 여러 개 (선택)
+  session-prompts/
+    setup-wizard.md           ← 처음 받은 AI가 읽고 대화형으로 세팅하는 스크립트
+    open-node.md              ← 노드 세션 부팅 프롬프트
+    pm-briefing.md            ← PM 세션 부팅 프롬프트
+  automation/                 ← 스탠드업 · 관심사 브리핑 · 헤드리스 디스패처 (선택)
 charters/
   charter-template.md         ← 빈 charter 스켈레톤 (한/영 병기 헤딩)
   README.md                   ← charter vs log vs releases, 어디에 뭘 쓰나

@@ -232,9 +232,14 @@ def _notify_creds() -> tuple[str, str, str] | None:
             continue
         k, v = line.split("=", 1)
         conf[k.strip()] = v.strip()
-    token, chat = conf.get("bot_token"), conf.get("chat_id")
+    # 봇 여러 개를 쓸 수 있다(control/bots.py). 트리 노티는 `tree` 역할을 쓰고,
+    # 없으면 접두사 없는 bot_token 으로 내려간다 — 봇 하나만 쓰던 설정도 그대로 동작.
+    role = cfg.get("role", "tree")
+    token = conf.get(f"{role}_bot_token") or conf.get("bot_token")
+    chat = conf.get(f"{role}_chat_id") or conf.get("chat_id")
     if not token or not chat:
-        print(f"(알림 생략 — {conf_path}에 bot_token/chat_id 없음)")
+        print(f"(알림 생략 — {conf_path}에 {role}_bot_token/{role}_chat_id 도, "
+              f"bot_token/chat_id 도 없음. notify.conf.example 참고)")
         return None
     return token, chat, cfg.get("prefix", "[tree]")
 

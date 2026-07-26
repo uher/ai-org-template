@@ -1,24 +1,59 @@
-# notify.conf — 텔레그램 알림 자격증명 (선택 기능)
+# notify.conf — 텔레그램 봇 자격증명 (선택 기능, 봇 여러 개 지원)
 #
-# 사용법:
-#   1) 이 파일을 control/notify.conf 로 복사한다.
-#   2) 값을 채운다.
-#   3) 권한을 좁힌다:  chmod 600 control/notify.conf
-#   4) control/tree.config.json 의 notify.enabled 를 true 로 바꾼다.
+# 시작하기:
+#   cp control/notify.conf.example control/notify.conf
+#   chmod 600 control/notify.conf          ← 권한 좁히기 (중요)
+#   python3 control/bots.py list           ← 설정 확인
+#   python3 control/bots.py test           ← 실제로 살아있는지 확인
+#   그리고 control/tree.config.json 의 notify.enabled 를 true 로.
 #
-# ⚠️ notify.conf 는 .gitignore 에 들어있다. **절대 커밋하지 마라.**
-#    토큰은 tree.config.json 이나 코드에 절대 넣지 않는다 — 오직 이 파일에만.
-#    알림을 끄고 싶으면 tree.config.json 의 notify.enabled=false,
-#    또는 일시적으로 환경변수 TREE_NOTIFY=0.
+# ⚠️ 이 파일은 .gitignore 에 들어있다. **절대 커밋하지 마라.**
+#    토큰은 tree.config.json 이나 코드에 절대 넣지 않는다 — 오직 여기에만.
+#    알림을 잠깐 끄려면 환경변수 TREE_NOTIFY=0.
 #
-# 봇 만드는 법: 텔레그램에서 @BotFather → /newbot → 토큰 발급.
-# chat_id 얻는 법: 그 봇에게 아무 메시지나 보낸 뒤
-#   curl "https://api.telegram.org/bot<토큰>/getUpdates" 의 result[].message.chat.id
+# ── 봇 만드는 법 (3분) ────────────────────────────────────────────────────
+#   1) 텔레그램에서 @BotFather 를 찾아 대화 시작
+#   2) /newbot  → 봇 이름 입력 → 사용자명 입력(반드시 `_bot` 으로 끝나야 함)
+#   3) `123456789:AAE...` 형태의 토큰을 준다 → 아래에 붙여넣는다
+#   4) **만든 봇을 찾아가 아무 메시지나 한 번 보낸다** (이걸 안 하면 봇이 당신에게
+#      먼저 말을 걸 수 없다 — 가장 흔한 실패 원인)
+#   5) chat_id 확인:
+#        curl "https://api.telegram.org/bot<토큰>/getUpdates"
+#      결과의 result[].message.chat.id 가 그것이다. 개인 채팅이면 숫자,
+#      그룹이면 `-100…` 처럼 음수다.
 #
-# 여러 명에게 보내려면 chat_id 를 쉼표로 나열한다.
+# ── 역할별로 봇을 나눈다 ──────────────────────────────────────────────────
+# 형식:  <역할>_bot_token / <역할>_chat_id
+# **역할 이름은 자유다.** 여기에 한 쌍을 추가하면 그 역할이 생긴다(코드 수정 불필요).
+#   python3 control/bots.py send <역할> "메시지"
+#
+# 왜 나누나: 알림을 한 봇에 몰면 정작 급한 것을 놓친다. 트리 운영 노티가
+# 하루 30번 울리는 방에 장애 알림이 섞이면, 그 알림은 없는 것과 같다.
+# 수신자가 아예 다른 경우(외부 리포트)는 반드시 분리해야 한다 — 사고는 여기서 난다.
+#
+# 여러 명에게 보내려면 chat_id 를 쉼표로 나열한다: tree_chat_id=111,222
 
-bot_token=123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-chat_id=123456789
+# 트리 운영 노티 (claim / handoff / 우편함) — node.py 가 자동으로 쓰는 역할.
+# 최소한 이것 하나만 있어도 된다.
+tree_bot_token=123456789:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+tree_chat_id=123456789
 
-# 팁: 알림 채널을 용도별로 분리하라. 트리 운영 알림(claim/handoff)이 진짜 중요한
-# 서비스 장애 알림과 같은 채팅방에 섞이면, 정작 급한 알림을 놓친다.
+# ── 아래는 선택. 필요한 것만 주석을 풀어 쓴다 ─────────────────────────────
+
+# 개인 비서 — 오늘 할 일 / 오늘의 결과 / 사람이 직접 대화하는 채널.
+#secretary_bot_token=
+#secretary_chat_id=
+
+# 외부 수신자용 리포트 (고객·투자자·팀원). **운영 알림과 절대 섞지 마라.**
+#report_bot_token=
+#report_chat_id=
+
+# 장애·이상 감지. 조용한 게 정상이고, 울리면 즉시 봐야 하는 채널.
+#alert_bot_token=
+#alert_chat_id=
+
+# ── 하위 호환 ─────────────────────────────────────────────────────────────
+# 접두사 없는 bot_token / chat_id 도 여전히 동작한다(기본 역할).
+# 역할을 못 찾으면 tree → default → 기본 순으로 내려간다.
+#bot_token=
+#chat_id=

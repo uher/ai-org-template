@@ -7,6 +7,9 @@
 | 파일 | 무엇 | 위험도 |
 |---|---|---|
 | `standup.py` | 모든 노드의 우편함 + charter 「다음 행동」을 모아 한 장으로. | 읽기 전용, 안전 |
+| `interest-brief.sh` | 관심 주제를 매일 검색·요약해 텔레그램으로. | 읽기·검색만, **비용 발생** |
+| `interests.md.example` | 그 브리핑의 기준(관심사·제외할 것·형식). | — |
+| `prompts/interest-brief.md` | 브리핑 세션에 주는 지시문. | — |
 | `backlog-dispatcher.sh` | 헤드리스 AI 세션을 깨워 백로그 1건을 처리시킨다. | **높음 — 아래 참고** |
 | `prompts/backlog-dispatcher.md` | 그 헤드리스 세션에 주는 지시문(범위 제한 포함). | — |
 | `com.example.tree-dispatcher.plist` | macOS launchd 등록 예시(경로 치환 필요). | — |
@@ -44,3 +47,25 @@ python3 control/automation/standup.py             # + 텔레그램(notify 설정
    이 시스템이 파일 기반인 이유가 여기서 다시 확인된다.
 
 설치 절차는 `../../SETUP.md` 「선택 3: 헤드리스 디스패처」 참조.
+
+## 관심사 브리핑 — 매일 아침 "내 분야에서 뭐가 있었나"
+
+```bash
+cp control/automation/interests.md.example control/automation/interests.md
+#  관심사·제외할 것·형식을 채운다 (세팅 마법사가 대신 채워주기도 한다)
+bash control/automation/interest-brief.sh          # 수동 실행으로 먼저 확인
+```
+
+헤드리스 세션이 `interests.md` 를 읽고 웹을 검색해 요약한 뒤 `secretary` 역할 봇으로
+보낸다(없으면 `tree`). 결과는 `control/automation/briefs/<날짜>.md` 에도 남는다.
+
+**도입 전에 알 것:**
+
+- **비용이 든다.** 실행 1회당 검색+요약 토큰이 소모된다(대략 몇십 센트~몇 달러).
+  `BRIEF_BUDGET` 환경변수로 상한을 조절하라(기본 $2). 필수 기능이 아니다 — 부담되면 켜지 마라.
+- **`interests.md` 가 없으면 아무것도 하지 않고 종료한다.** 추측으로 브리핑을 만들면
+  소음만 쌓인다. 관심사를 **구체적으로** 적을수록 결과가 좋다.
+- **"보고 싶지 않은 것"을 반드시 적어라.** 이게 없으면 분량을 채우려고 뻔한 뉴스가 온다.
+- 프롬프트가 "없는 날은 없다고 하라"고 지시해 두었다. 매일 5건이 오지 않는 게 정상이다.
+
+스케줄 등록은 `crontab.example` / `com.example.tree-dispatcher.plist` 의 경로만 바꿔 쓴다.
