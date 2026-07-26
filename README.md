@@ -3,6 +3,10 @@
 **여러 개의 AI 세션을 하나의 워크스페이스에서 병렬로 굴리기 위한 파일 기반 협업 규약.**
 락 · 비동기 우편함 · 노드별 charter · 학습형 릴리스 노트.
 
+> 👉 **처음이라면 [`QUICKSTART.md`](QUICKSTART.md) 하나만 따라가세요 — 10분, Python 3.9+ 외에 준비물 없음.**
+> 이 README는 "왜 이렇게 만들었나"를 설명하는 문서입니다.
+> *New here? Start with [`QUICKSTART.md`](QUICKSTART.md) — 10 minutes, no dependencies.*
+
 ---
 
 ## English summary
@@ -57,9 +61,10 @@ python3 control/node.py inbox L4
 python3 control/node.py --as "me" release L5.1 "done"
 ```
 
-Then edit `control/tree.config.json` to describe *your* tree. Full walkthrough in
-[`SETUP.md`](SETUP.md); the rules everyone (human and AI) must follow are in
-[`GUIDE.md`](GUIDE.md). Python 3.9+, standard library only, no install step.
+Then edit `control/tree.config.json` to describe *your* tree. Step-by-step in
+[`QUICKSTART.md`](QUICKSTART.md) (10 min), full walkthrough in [`SETUP.md`](SETUP.md);
+the rules everyone (human and AI) must follow are in [`GUIDE.md`](GUIDE.md).
+Python 3.9+, standard library only, no install step.
 
 Docs are primarily in Korean — the CLI and file formats are language-neutral.
 
@@ -147,7 +152,8 @@ python3 control/node.py --as "나·테스트" release L5.1 "확인 완료"
 ## 들어있는 것
 
 ```
-README.md                     ← 지금 이 문서
+README.md                     ← 지금 이 문서 (왜)
+QUICKSTART.md                 ← 10분 만에 돌려보기 (처음이면 여기부터)
 GUIDE.md                      ← 규칙 전문 (세션에 읽히는 문서)
 SETUP.md                      ← 단계별 설치·적용 가이드
 control/
