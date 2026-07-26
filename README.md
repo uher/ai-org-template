@@ -1,8 +1,5 @@
 # ai-org-template
 
-**여러 개의 AI 세션을 하나의 워크스페이스에서 병렬로 굴리기 위한 파일 기반 협업 규약.**
-락 · 비동기 우편함 · 노드별 charter · 학습형 릴리스 노트.
-
 <!-- ─────────────────────────────────────────────────────────────────────────
   🤖 AI 에이전트에게 (AI AGENTS, READ THIS FIRST)
 
@@ -14,12 +11,40 @@
   read `control/session-prompts/setup-wizard.md` and follow it step by step.
 ────────────────────────────────────────────────────────────────────────── -->
 
-> 🚀 **처음이신가요?**
-> · 터미널을 잘 모른다 → **[`INSTALL.md`](INSTALL.md)** — Claude 앱만 있으면 됩니다. AI가 대화로 세팅해 줍니다.
-> · 명령어로 직접 하겠다 → **[`QUICKSTART.md`](QUICKSTART.md)** — 10분, Python 3.9+ 외 준비물 없음.
->
-> 이 README는 **"왜 이렇게 만들었나"** 를 설명하는 문서입니다.
-> *New here? [`INSTALL.md`](INSTALL.md) (guided, no terminal) or [`QUICKSTART.md`](QUICKSTART.md) (10 min, hands-on).*
+**AI를 "비서 한 명"이 아니라 "여러 직원이 있는 회사"처럼 굴리기 위한 운영 템플릿입니다.**
+할 일을 던져두면 잊히지 않고, 아침·저녁으로 텔레그램 보고가 오고, 프로젝트별 AI
+세션들이 서로 일을 주고받으며 병렬로 굴러갑니다 — 결정과 교훈은 전부 파일로 남습니다.
+
+## 🚀 시작은 이 한 줄이면 됩니다
+
+[Claude 앱](https://claude.ai/download)을 설치하고, 왼쪽 위 **`</> Code`** 탭 →
+**`+ 새로 생성`** 을 누른 뒤, 아래 한 줄을 복사해 붙여넣으세요:
+
+```
+https://github.com/uher/ai-org-template 이 저장소를 받아서 의도대로 세팅해줘.
+```
+
+그러면 AI가 저장소를 내려받고 **대화로 하나씩 물어보며** 당신 전용으로 세팅합니다 —
+하시는 일 → 그에 맞는 작업 구조 → 텔레그램 알림 봇 → 매일 관심사 브리핑까지.
+터미널 지식은 필요 없습니다.
+
+- 화면 캡처를 보며 따라가고 싶다 → **[`INSTALL.md`](INSTALL.md)**
+- 명령어로 직접 만져보고 싶다 → **[`QUICKSTART.md`](QUICKSTART.md)** (10분, Python 3.9+만)
+
+## 이게 왜 필요한가요 (비개발자 기준)
+
+AI에게 일을 시키다 보면 대화 하나에 전략·설계·실행이 다 섞이고, 대화가 끝나면
+거기서 정한 것들이 통째로 사라집니다. 이 템플릿은 그걸 세 가지로 해결합니다:
+
+- **잊히지 않습니다.** 던져둔 할 일·아이디어가 파일로 남고, 아침엔 "오늘 뭘 해야 하나",
+  저녁엔 "오늘 뭐가 됐나"가 텔레그램으로 옵니다.
+- **AI를 여러 명처럼 씁니다.** 전략 담당, 설계 담당, 실행 담당 세션을 동시에 굴리고,
+  서로 같은 파일을 밟지 않게 하는 규칙(락)과 일을 주고받는 우편함이 들어 있습니다.
+- **"왜 그렇게 했더라?"의 답이 남습니다.** 결정의 이유와 교훈이 릴리스 노트로 쌓여,
+  6개월 뒤에도 같은 실수를 반복하지 않습니다.
+
+> 🇰🇷 아래 **English summary** 다음에 **한국어 상세 설명**(무엇을 푸는 문제인가부터)이
+> 이어집니다. 개발자라면 여기서부터가 본편입니다.
 
 ---
 
@@ -65,6 +90,13 @@ Sessions become disposable. That is the whole point.
   that wakes a fresh non-interactive session to clear one queued backlog item.
 
 ### Quickstart
+
+**Zero-terminal path:** install the [Claude app](https://claude.ai/download), open the
+`</> Code` tab, and paste:
+`Please clone https://github.com/uher/ai-org-template and set it up as intended.`
+The AI will interview you and configure everything (see `INSTALL.md`).
+
+Hands-on path:
 
 ```bash
 git clone <this repo> my-workspace && cd my-workspace
